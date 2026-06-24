@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SF5_Tournament", "SF5_Tournament\SF5_Tournament.csproj", "{94F751F9-C869-4A2F-9CB7-B55183D7AEC4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{94F751F9-C869-4A2F-9CB7-B55183D7AEC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94F751F9-C869-4A2F-9CB7-B55183D7AEC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94F751F9-C869-4A2F-9CB7-B55183D7AEC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94F751F9-C869-4A2F-9CB7-B55183D7AEC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
