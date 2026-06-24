@@ -1,0 +1,49 @@
+@model TournamentCreateViewModel
+@{
+    ViewData["Title"] = "New Tournament";
+    var players = (IEnumerable<Player>)ViewBag.Players;
+}
+
+<h2 class="mb-3">New Tournament</h2>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body p-3">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Tournament Name</label>
+                <input asp-for="Name" class="form-control"/>
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <label class="form-label">Select Players</label>
+            @if (!players.Any())
+            {
+                <div class="alert alert-warning">No players registered. Add players first.</div>
+            }
+            else
+            {
+                <div class="row row-cols-2 row-cols-md-3 g-2 mb-3">
+                    @foreach (var p in players)
+                    {
+                        <div class="col">
+                            <div class="form-check bg-black border border-secondary rounded p-2">
+                                <input class="form-check-input" type="checkbox" name="SelectedPlayerIds" value="@p.Id" id="p_@p.Id"/>
+                                <label class="form-check-label small" for="p_@p.Id">
+                                    @p.Name <span class="text-secondary">· @p.MainCharacter</span>
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="SelectedPlayerIds" class="text-danger small"></span>
+            }
+
+            <button type="submit" class="btn btn-warning fw-bold" disabled="@(players.Count() < 1)">Create</button>
+            <a asp-action="Index" class="btn btn-outline-light">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

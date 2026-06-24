@@ -1,0 +1,236 @@
+@model Tournament
+@using SF5_Tournament.Services
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@{
+    ViewData["Title"] = Model.Name;
+    var token = Xsrf.GetAndStoreTokens(Context).RequestToken;
+    var standings = (List<StandingRow>)ViewBag.Standings;
+    var minPlayers = (int)ViewBag.MinPlayers;
+    var groupMatches = Model.Matches.Where(m => m.Stage == MatchStage.Group).OrderBy(m => m.RoundNumber).ToList();
+    var matchesByRound = groupMatches.GroupBy(m => m.RoundNumber);
+    var knockoutMatches = Model.Matches.Where(m => m.Stage != MatchStage.Group).OrderBy(m => m.Stage).ToList();
+    var allGroupDone = groupMatches.All(m => m.IsCompleted) && groupMatches.Any();
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h2 class="mb-0">@Model.Name</h2>
+    <span class="badge text-bg-@StatusClass(Model.Status) fs-6">@Model.Status</span>
+</div>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+
+@if (Model.Status == TournamentStatus.Draft)
+{
+    <div class="card bg-dark border-secondary mb-3">
+        <div class="card-body p-3">
+            <h5 class="card-title">Participants (@Model.Participants.Count)</h5>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                @foreach (var tp in Model.Participants)
+                {
+                    <span class="badge text-bg-secondary fs-6">@tp.Player.Name</span>
+                }
+            </div>
+            @if (Model.Participants.Count < minPlayers)
+            {
+                <div class="alert alert-warning mb-0">Need at least @minPlayers players to start.</div>
+            }
+            else
+            {
+                <form asp-action="Start" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('Start the group stage? Matches will be generated.');">
+                    <button class="btn btn-warning fw-bold">▶ Start Group Stage</button>
+                </form>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.Status != TournamentStatus.Draft)
+{
+    <h4 class="mb-2">Standings</h4>
+    <div class="table-responsive mb-3">
+        <table class="table table-dark table-striped align-middle">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th class="text-center">Pts</th>
+                <th class="text-center d-none d-sm-table-cell">W-L</th>
+                <th class="text-center">Diff</th>
+            </tr>
+            </thead>
+            <tbody id="standings-body">
+            @await Html.PartialAsync("_StandingsRows", standings)
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.Status == TournamentStatus.GroupStage && allGroupDone)
+    {
+        <form asp-action="Advance" asp-route-id="@Model.Id" method="post" class="mb-4"
+              onsubmit="return confirm('Advance to the knockout stage? Top 4 seeds will be bracketed.');">
+            <button id="advanceBtn" class="btn btn-danger fw-bold">▶ Advance to Knockout (Top 4)</button>
+        </form>
+    }
+
+    <h4 class="mb-2">Matches</h4>
+    @foreach (var round in matchesByRound)
+    {
+        <h6 class="text-secondary mt-3">Round @round.Key</h6>
+        <div class="table-responsive mb-2">
+            <table class="table table-dark table-sm align-middle">
+                <tbody>
+                @foreach (var m in round)
+                {
+                    <tr>
+                        <td class="text-end">@m.Player1?.Name</td>
+                        <td class="text-center text-nowrap" id="cell-@m.Id">
+                            @if (m.IsCompleted)
+                            {
+                                <span class="badge text-bg-dark border border-secondary">@m.Player1Score - @m.Player2Score</span>
+                            }
+                            else if (m.Player1 is not null && m.Player2 is not null)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                        onclick="openScore('@m.Id', @Json.Serialize(m.Player1?.Name), @Json.Serialize(m.Player2?.Name))">
+                                    enter
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-secondary">bye</span>
+                            }
+                        </td>
+                        <td>@m.Player2?.Name</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (knockoutMatches.Any())
+    {
+        <h4 class="mt-4 mb-2">Knockout</h4>
+        <div class="mb-3">
+            <a asp-action="Bracket" asp-route-id="@Model.Id" class="btn btn-outline-warning">View Bracket</a>
+        </div>
+    }
+}
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-outline-light btn-sm">← Back</a>
+</div>
+
+<!-- Score entry modal -->
+<div class="modal fade" id="scoreModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Log Result</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="scoreForm">
+                <div class="modal-body">
+                    <input type="hidden" id="m-matchId"/>
+                    <div class="row text-center align-items-center g-2">
+                        <div class="col-5 fw-semibold" id="m-p1"></div>
+                        <div class="col-2 text-secondary">vs</div>
+                        <div class="col-5 fw-semibold" id="m-p2"></div>
+                        <div class="col-5">
+                            <input type="number" id="m-s1" class="form-control text-center" min="0" max="2" value="2" required/>
+                        </div>
+                        <div class="col-2 text-center text-secondary">-</div>
+                        <div class="col-5">
+                            <input type="number" id="m-s2" class="form-control text-center" min="0" max="2" value="0" required/>
+                        </div>
+                    </div>
+                    <div id="scoreError" class="text-danger small mt-2 text-center"></div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning fw-bold">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <meta name="csrf-token" content="@token"/>
+    <script>
+        const xsrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const scoreUrl = '@Url.Action("UpdateScore", "Tournaments")';
+        let scoreModal;
+
+        function openScore(matchId, p1Name, p2Name) {
+            document.getElementById('m-matchId').value = matchId;
+            document.getElementById('m-p1').textContent = p1Name;
+            document.getElementById('m-p2').textContent = p2Name;
+            document.getElementById('m-s1').value = 2;
+            document.getElementById('m-s2').value = 0;
+            document.getElementById('scoreError').textContent = '';
+            scoreModal = scoreModal || new bootstrap.Modal('#scoreModal');
+            scoreModal.show();
+        }
+
+        function rebuildStandings(rows) {
+            const body = document.getElementById('standings-body');
+            body.innerHTML = rows.map(r => `
+                <tr class="${r.rank <= 4 ? 'table-success' : ''}">
+                    <td class="fw-bold">${r.rank}</td>
+                    <td>${r.name}</td>
+                    <td class="text-center">${r.points}</td>
+                    <td class="text-center d-none d-sm-table-cell">${r.wins}-${r.losses}</td>
+                    <td class="text-center">${(r.gameDiff > 0 ? '+' : '') + r.gameDiff}</td>
+                </tr>`).join('');
+        }
+
+        document.getElementById('scoreForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errEl = document.getElementById('scoreError');
+            errEl.textContent = '';
+            const body = {
+                matchId: document.getElementById('m-matchId').value,
+                player1Score: parseInt(document.getElementById('m-s1').value, 10),
+                player2Score: parseInt(document.getElementById('m-s2').value, 10)
+            };
+            try {
+                const res = await fetch(scoreUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': xsrfToken },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    errEl.textContent = data.error || 'Failed to save.';
+                    return;
+                }
+                const cell = document.getElementById('cell-' + body.matchId);
+                cell.innerHTML = `<span class="badge text-bg-dark border border-secondary">${body.player1Score} - ${body.player2Score}</span>`;
+                rebuildStandings(data.standings);
+                if (data.canAdvance) {
+                    const adv = document.getElementById('advanceBtn');
+                    if (adv) adv.closest('form').style.display = '';
+                }
+                scoreModal.hide();
+            } catch (ex) {
+                errEl.textContent = 'Network error.';
+            }
+        });
+    </script>
+}
+
+@functions {
+    static string StatusClass(TournamentStatus s) => s switch
+    {
+        TournamentStatus.Draft => "secondary",
+        TournamentStatus.GroupStage => "warning",
+        TournamentStatus.KnockoutStage => "danger",
+        TournamentStatus.Finished => "success",
+        _ => "secondary"
+    };
+}

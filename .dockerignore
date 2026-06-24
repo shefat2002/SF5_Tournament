@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.git/
+.gitignore
+.idea/
+.vscode/
+SF5_Tournament/app.db
+*.db
+postgres.md
+Dockerfile
+.dockerignore

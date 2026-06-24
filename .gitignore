@@ -402,3 +402,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Secrets / local DB — never commit
+postgres.md
+app.db
+*.db
+

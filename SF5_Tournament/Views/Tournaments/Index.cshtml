@@ -1,0 +1,35 @@
+@model IEnumerable<Tournament>
+@{
+    ViewData["Title"] = "Tournaments";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Tournaments</h2>
+    <a class="btn btn-warning fw-bold" asp-action="Create">+ New Tournament</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">No tournaments yet. Create one to get started.</div>
+}
+
+<div class="list-group">
+    @foreach (var t in Model)
+    {
+        <a asp-action="Detail" asp-route-id="@t.Id" class="list-group-item list-group-item-action bg-dark border-secondary text-light d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">@t.Name</span>
+            <span class="badge text-bg-@StatusClass(t.Status)">@t.Status</span>
+        </a>
+    }
+</div>
+
+@functions {
+    static string StatusClass(TournamentStatus s) => s switch
+    {
+        TournamentStatus.Draft => "secondary",
+        TournamentStatus.GroupStage => "warning",
+        TournamentStatus.KnockoutStage => "danger",
+        TournamentStatus.Finished => "success",
+        _ => "secondary"
+    };
+}

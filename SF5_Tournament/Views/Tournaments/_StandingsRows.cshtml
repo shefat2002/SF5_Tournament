@@ -1,0 +1,15 @@
+@model List<StandingRow>
+
+@foreach (var s in Model)
+{
+    <tr class="@(s.Rank <= 4 ? "table-success" : "")">
+        <td class="fw-bold">@s.Rank</td>
+        <td>
+            @s.Name
+            <span class="text-secondary small d-block d-sm-none">@s.Character</span>
+        </td>
+        <td class="text-center">@s.Points</td>
+        <td class="text-center d-none d-sm-table-cell">@s.Wins-@s.Losses</td>
+        <td class="text-center">@($"{s.GameDiff:+0;-0;0}")</td>
+    </tr>
+}

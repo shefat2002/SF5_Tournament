@@ -1,0 +1,35 @@
+@model PlayerViewModel
+@{
+    ViewData["Title"] = "Add Player";
+    var chars = (IReadOnlyList<string>)ViewBag.Characters;
+}
+
+<h2 class="mb-3">Add Player</h2>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body p-3">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control"/>
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MainCharacter" class="form-label"></label>
+                <select asp-for="MainCharacter" class="form-select">
+                    @foreach (var c in chars)
+                    {
+                        <option value="@c">@c</option>
+                    }
+                </select>
+                <span asp-validation-for="MainCharacter" class="text-danger small"></span>
+            </div>
+            <button type="submit" class="btn btn-warning fw-bold">Save</button>
+            <a asp-action="Index" class="btn btn-outline-light">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

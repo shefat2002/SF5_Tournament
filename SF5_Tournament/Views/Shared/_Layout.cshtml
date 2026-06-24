@@ -1,19 +1,18 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - SF5_Tournament</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - SF5 Tournament</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/SF5_Tournament.styles.css" asp-append-version="true"/>
 </head>
-<body>
+<body class="bg-dark text-light">
 <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SF5_Tournament</a>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-black border-bottom border-secondary box-shadow mb-3">
+        <div class="container-fluid px-2">
+            <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">SF5 Tournament</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -21,10 +20,13 @@
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <a class="nav-link text-light" asp-area="" asp-controller="Players" asp-action="Index">Players</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" asp-area="" asp-controller="Tournaments" asp-action="Index">Tournaments</a>
                     </li>
                 </ul>
                 <partial name="_LoginPartial"/>
@@ -32,15 +34,15 @@
         </div>
     </nav>
 </header>
-<div class="container">
+<div class="container px-2 py-3">
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
 </div>
 
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2026 - SF5_Tournament - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+<footer class="border-top border-secondary footer text-muted">
+    <div class="container px-2">
+        &copy; 2026 - SF5 Tournament
     </div>
 </footer>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
