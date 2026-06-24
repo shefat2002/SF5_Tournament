@@ -27,25 +27,25 @@ body {
   font-family: var(--body);
   color: var(--ink);
   background-color: var(--cream);
-  background-image: url("/images/bg.svg");
+  background-image: url("/images/bg1.jpg");
   background-repeat: no-repeat;
-  background-position: top center;
+  background-position: center center;
   background-size: cover;
   background-attachment: fixed;
   margin-bottom: 70px;
   letter-spacing: .01em;
 }
 
-/* halftone grain over the whole page */
+/* cream scrim + halftone grain over the photo — keeps content legible */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(22,20,18,.07) 1px, transparent 1px);
+  background-color: rgba(251, 243, 224, 0.76);
+  background-image: radial-gradient(rgba(22, 20, 18, .06) 1px, transparent 1px);
   background-size: 4px 4px;
-  mix-blend-mode: multiply;
 }
 
 header, main, footer { position: relative; z-index: 1; }
