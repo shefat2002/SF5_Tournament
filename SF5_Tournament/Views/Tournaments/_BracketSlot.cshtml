@@ -21,7 +21,7 @@
                 <span class="text-truncate @(m.WinnerId == m.Player2Id ? "fw-bold text-warning" : "")">@m.Player2?.Name</span>
                 <span class="badge text-bg-dark border border-secondary">@SlotScore(m.Player2Score)</span>
             </div>
-            @if (!m.IsCompleted && m.Player1 is not null && m.Player2 is not null)
+            @if (!m.IsCompleted && m.Player1 is not null && m.Player2 is not null && User.Identity?.IsAuthenticated == true)
             {
                 <button type="button" class="btn btn-sm btn-outline-warning w-100 mt-2"
                         onclick="openScore('@m.Id', @Json.Serialize(m.Player1?.Name), @Json.Serialize(m.Player2?.Name))">

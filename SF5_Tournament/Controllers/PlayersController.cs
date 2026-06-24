@@ -9,6 +9,7 @@ namespace SF5_Tournament.Controllers;
 [Authorize]
 public class PlayersController(ApplicationDbContext db) : Controller
 {
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var players = await db.Players.OrderBy(p => p.Name).ToListAsync();

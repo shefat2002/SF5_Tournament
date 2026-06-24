@@ -12,6 +12,7 @@ public class TournamentsController(ApplicationDbContext db) : Controller
 {
     private const int MinPlayers = 4;
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var tournaments = await db.Tournaments
@@ -58,6 +59,7 @@ public class TournamentsController(ApplicationDbContext db) : Controller
         return RedirectToAction(nameof(Detail), new { id = tournament.Id });
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Detail(Guid id)
     {
         var tournament = await db.Tournaments
@@ -118,6 +120,7 @@ public class TournamentsController(ApplicationDbContext db) : Controller
         return RedirectToAction(nameof(Bracket), new { id });
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Bracket(Guid id)
     {
         var tournament = await db.Tournaments

@@ -5,20 +5,34 @@ using SF5_Tournament.Models;
 
 namespace SF5_Tournament.Services;
 
-/// <summary>Ensures a default admin account exists on startup.</summary>
+public record AdminSeed(string Username, string Password);
+
+/// <summary>Ensures configured admin accounts exist on startup.</summary>
 public static class DbSeeder
 {
     public static async Task SeedAdminAsync(IServiceProvider services)
     {
         var db = services.GetRequiredService<ApplicationDbContext>();
         var config = services.GetRequiredService<IConfiguration>();
+        var hasher = new PasswordHasher<User>();
 
-        var username = config["Admin:Username"] ?? "admin";
-        var password = config["Admin:Password"];
+        // Backward-compatible single admin (Admin:Username / Admin:Password).
+        await EnsureUserAsync(db, hasher, config["Admin:Username"], config["Admin:Password"]);
 
-        if (string.IsNullOrWhiteSpace(password))
+        // Additional admins from the Admins:[ {Username, Password} ] config list.
+        var admins = config.GetSection("Admins").Get<List<AdminSeed>>() ?? new List<AdminSeed>();
+        foreach (var a in admins)
         {
-            return; // nothing to seed without a configured password
+            await EnsureUserAsync(db, hasher, a.Username, a.Password);
+        }
+    }
+
+    private static async Task EnsureUserAsync(
+        ApplicationDbContext db, PasswordHasher<User> hasher, string? username, string? password)
+    {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            return;
         }
 
         if (await db.Users.AnyAsync(u => u.Username == username))
@@ -26,10 +40,8 @@ public static class DbSeeder
             return;
         }
 
-        var hasher = new PasswordHasher<User>();
         var user = new User { Username = username };
         user.PasswordHash = hasher.HashPassword(user, password);
-
         db.Users.Add(user);
         await db.SaveChangesAsync();
     }

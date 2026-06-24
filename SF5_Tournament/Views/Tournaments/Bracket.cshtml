@@ -4,6 +4,7 @@
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @{
     ViewData["Title"] = Model.Name + " — Bracket";
+    var authed = User.Identity?.IsAuthenticated == true;
     var token = Xsrf.GetAndStoreTokens(Context).RequestToken;
     var semis = Model.Matches.Where(m => m.Stage == MatchStage.Semifinal).OrderBy(m => m.RoundNumber).ToList();
     var final = Model.Matches.FirstOrDefault(m => m.Stage == MatchStage.Final);
@@ -32,84 +33,90 @@
     <a asp-action="Detail" asp-route-id="@Model.Id" class="btn btn-outline-light btn-sm">← Group Stage</a>
 </div>
 
-<div class="modal fade" id="scoreModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border-secondary text-light">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title">Log Result</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="scoreForm">
-                <div class="modal-body">
-                    <input type="hidden" id="m-matchId"/>
-                    <div class="row text-center align-items-center g-2">
-                        <div class="col-5 fw-semibold" id="m-p1"></div>
-                        <div class="col-2 text-secondary">vs</div>
-                        <div class="col-5 fw-semibold" id="m-p2"></div>
-                        <div class="col-5">
-                            <input type="number" id="m-s1" class="form-control text-center" min="0" max="2" value="2" required/>
+@if (authed)
+{
+    <div class="modal fade" id="scoreModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Log Result</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="scoreForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="m-matchId"/>
+                        <div class="row text-center align-items-center g-2">
+                            <div class="col-5 fw-semibold" id="m-p1"></div>
+                            <div class="col-2 text-secondary">vs</div>
+                            <div class="col-5 fw-semibold" id="m-p2"></div>
+                            <div class="col-5">
+                                <input type="number" id="m-s1" class="form-control text-center" min="0" max="2" value="2" required/>
+                            </div>
+                            <div class="col-2 text-center text-secondary">-</div>
+                            <div class="col-5">
+                                <input type="number" id="m-s2" class="form-control text-center" min="0" max="2" value="0" required/>
+                            </div>
                         </div>
-                        <div class="col-2 text-center text-secondary">-</div>
-                        <div class="col-5">
-                            <input type="number" id="m-s2" class="form-control text-center" min="0" max="2" value="0" required/>
-                        </div>
+                        <div id="scoreError" class="text-danger small mt-2 text-center"></div>
                     </div>
-                    <div id="scoreError" class="text-danger small mt-2 text-center"></div>
-                </div>
-                <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning fw-bold">Save</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning fw-bold">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
 
 @section Scripts {
-    <meta name="csrf-token" content="@token"/>
-    <script>
-        const xsrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const scoreUrl = '@Url.Action("UpdateScore", "Tournaments")';
-        let scoreModal;
+    @if (authed)
+    {
+        <meta name="csrf-token" content="@token"/>
+        <script>
+            const xsrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const scoreUrl = '@Url.Action("UpdateScore", "Tournaments")';
+            let scoreModal;
 
-        function openScore(matchId, p1Name, p2Name) {
-            document.getElementById('m-matchId').value = matchId;
-            document.getElementById('m-p1').textContent = p1Name;
-            document.getElementById('m-p2').textContent = p2Name;
-            document.getElementById('m-s1').value = 2;
-            document.getElementById('m-s2').value = 0;
-            document.getElementById('scoreError').textContent = '';
-            scoreModal = scoreModal || new bootstrap.Modal('#scoreModal');
-            scoreModal.show();
-        }
-
-        document.getElementById('scoreForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const errEl = document.getElementById('scoreError');
-            errEl.textContent = '';
-            const body = {
-                matchId: document.getElementById('m-matchId').value,
-                player1Score: parseInt(document.getElementById('m-s1').value, 10),
-                player2Score: parseInt(document.getElementById('m-s2').value, 10)
-            };
-            try {
-                const res = await fetch(scoreUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': xsrfToken },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
-                if (!res.ok || !data.success) {
-                    errEl.textContent = data.error || 'Failed to save.';
-                    return;
-                }
-                scoreModal.hide();
-                location.reload(); // bracket grows as matches resolve
-            } catch (ex) {
-                errEl.textContent = 'Network error.';
+            function openScore(matchId, p1Name, p2Name) {
+                document.getElementById('m-matchId').value = matchId;
+                document.getElementById('m-p1').textContent = p1Name;
+                document.getElementById('m-p2').textContent = p2Name;
+                document.getElementById('m-s1').value = 2;
+                document.getElementById('m-s2').value = 0;
+                document.getElementById('scoreError').textContent = '';
+                scoreModal = scoreModal || new bootstrap.Modal('#scoreModal');
+                scoreModal.show();
             }
-        });
-    </script>
+
+            document.getElementById('scoreForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errEl = document.getElementById('scoreError');
+                errEl.textContent = '';
+                const body = {
+                    matchId: document.getElementById('m-matchId').value,
+                    player1Score: parseInt(document.getElementById('m-s1').value, 10),
+                    player2Score: parseInt(document.getElementById('m-s2').value, 10)
+                };
+                try {
+                    const res = await fetch(scoreUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': xsrfToken },
+                        body: JSON.stringify(body)
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                        errEl.textContent = data.error || 'Failed to save.';
+                        return;
+                    }
+                    scoreModal.hide();
+                    location.reload();
+                } catch (ex) {
+                    errEl.textContent = 'Network error.';
+                }
+            });
+        </script>
+    }
 }
 
 @functions {
