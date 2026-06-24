@@ -3,13 +3,15 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using SF5_Tournament.Data;
 using SF5_Tournament.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = NormalizeConnectionString(rawConnection);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -82,3 +84,27 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+return;
+
+// Accepts either a key=value connection string or a postgresql:// URL (as Render provides).
+static string NormalizeConnectionString(string raw)
+{
+    if (!raw.StartsWith("postgres", StringComparison.OrdinalIgnoreCase))
+    {
+        return raw; // already key=value
+    }
+
+    var uri = new Uri(raw);
+    var userInfo = uri.UserInfo.Split(':', 2);
+    var cs = new NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.IsDefaultPort ? 5432 : uri.Port,
+        Username = userInfo[0],
+        Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
+        Database = uri.LocalPath.TrimStart('/'),
+        TrustServerCertificate = true,
+        SslMode = SslMode.Prefer
+    };
+    return cs.ToString();
+}
