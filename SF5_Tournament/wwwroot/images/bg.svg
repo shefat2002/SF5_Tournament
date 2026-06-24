@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1280" preserveAspectRatio="xMidYMin slice" role="img" aria-label="Energy burst">
+  <defs>
+    <!-- one thin ray radiating from top-center -->
+    <path id="ray-r" d="M960 -40 L976 1300 L944 1300 Z" fill="#e21b1b"/>
+    <path id="ray-y" d="M960 -40 L976 1300 L944 1300 Z" fill="#ffc60b"/>
+    <radialGradient id="sun" cx="50%" cy="0%" r="65%">
+      <stop offset="0%" stop-color="#ffd400"/>
+      <stop offset="45%" stop-color="#ff8a00"/>
+      <stop offset="100%" stop-color="#e21b1b"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="0%" r="75%">
+      <stop offset="0%" stop-color="#ffd400" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#ff8a00" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#e21b1b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ground wash -->
+  <rect width="1920" height="1280" fill="#fbf3e0"/>
+
+  <!-- central glow -->
+  <rect width="1920" height="1280" fill="url(#glow)"/>
+
+  <!-- rising-sun rays, alternating red / yellow -->
+  <g opacity="0.85">
+    <use href="#ray-r" transform="rotate(7 960 -40)"/>
+    <use href="#ray-y" transform="rotate(22 960 -40)"/>
+    <use href="#ray-r" transform="rotate(37 960 -40)"/>
+    <use href="#ray-y" transform="rotate(52 960 -40)"/>
+    <use href="#ray-r" transform="rotate(67 960 -40)"/>
+    <use href="#ray-y" transform="rotate(82 960 -40)"/>
+    <use href="#ray-r" transform="rotate(97 960 -40)"/>
+    <use href="#ray-y" transform="rotate(112 960 -40)"/>
+    <use href="#ray-r" transform="rotate(127 960 -40)"/>
+    <use href="#ray-y" transform="rotate(142 960 -40)"/>
+    <use href="#ray-r" transform="rotate(157 960 -40)"/>
+    <use href="#ray-y" transform="rotate(172 960 -40)"/>
+    <use href="#ray-r" transform="rotate(-7 960 -40)"/>
+    <use href="#ray-y" transform="rotate(-22 960 -40)"/>
+    <use href="#ray-r" transform="rotate(-37 960 -40)"/>
+    <use href="#ray-y" transform="rotate(-52 960 -40)"/>
+    <use href="#ray-r" transform="rotate(-67 960 -40)"/>
+    <use href="#ray-y" transform="rotate(-82 960 -40)"/>
+    <use href="#ray-r" transform="rotate(-97 960 -40)"/>
+    <use href="#ray-y" transform="rotate(-112 960 -40)"/>
+    <use href="#ray-r" transform="rotate(-127 960 -40)"/>
+    <use href="#ray-y" transform="rotate(-142 960 -40)"/>
+    <use href="#ray-r" transform="rotate(-157 960 -40)"/>
+    <use href="#ray-y" transform="rotate(-172 960 -40)"/>
+  </g>
+
+  <!-- sun core -->
+  <circle cx="960" cy="-40" r="230" fill="url(#sun)"/>
+</svg>

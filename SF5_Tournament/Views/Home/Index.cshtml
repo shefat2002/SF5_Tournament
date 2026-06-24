@@ -3,19 +3,20 @@
     var authed = User.Identity?.IsAuthenticated == true;
 }
 
-<div class="text-center py-4">
-    <h1 class="display-5 fw-bold">SF5 Tournament</h1>
-    <p class="text-secondary">Street Fighter 5 local tournament management — round robin groups, live scores, Top 4 bracket.</p>
+<section class="sf-hero">
+    <h1 class="sf-rise sf-d1">STREET<br/>FIGHTER</h1>
+    <div class="sf-rise sf-d2"><span class="sf-tag">Tournament Manager</span></div>
+    <p class="sf-sub sf-rise sf-d3">Round-robin groups · live score entry · Top-4 knockout bracket</p>
 
-    <div class="d-flex justify-content-center gap-2 flex-wrap mt-4">
+    <div class="d-flex justify-content-center gap-2 flex-wrap mt-4 sf-rise sf-d3">
         @if (authed)
         {
-            <a class="btn btn-warning fw-bold" asp-controller="Tournaments" asp-action="Index">Tournaments</a>
-            <a class="btn btn-outline-light" asp-controller="Players" asp-action="Index">Players</a>
+            <a class="btn btn-warning fw-bold" asp-controller="Tournaments" asp-action="Index">Enter The Arena</a>
+            <a class="btn btn-outline-light" asp-controller="Players" asp-action="Index">Roster</a>
         }
         else
         {
             <a class="btn btn-warning fw-bold" asp-controller="Auth" asp-action="Login">Admin Login</a>
         }
     </div>
-</div>
+</section>
