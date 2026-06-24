@@ -10,6 +10,7 @@ This document acts as the core context guide for the AI development agents (Clau
 2.  **No SPA Overhead:** Do not introduce React, Angular, or Vue. Rely on server-rendered Razor Views (`.cshtml`) paired with **Bootstrap 5.3** (utilizing dark themes for a classic fighting game aesthetic) and **jQuery** for DOM updates and asynchronous APIs.
 3.  **Mobile Compatibility:** Ensure all views are wrapped in container classes with responsive utility padding (`px-2 py-3`). Form elements must use `.form-control` and tables must use `.table-responsive` to guarantee usability on small touch screens.
 4.  **Strict Security:** Score updates, player generation, and stage progression routes must be guarded by JWT cookie authentication. Read-only dashboards and bracket charts are public.
+5.  **AI Work Log:** Every AI agent session **must** append a dated entry to `/docs/` documenting what was built/changed/fixed (see "AI Work Documentation Log" below). No code-shaping work is considered complete until its `/docs/` entry exists.
 
 ---
 
@@ -72,3 +73,19 @@ This document acts as the core context guide for the AI development agents (Clau
 ### Step 8: Deployment to Render
 *   [ ] Write a standard `.dockerignore` and multi-stage `Dockerfile` targeted for .NET 10.
 *   [ ] Configure Render PostgreSQL credentials. Set environment variables safely.
+
+---
+
+## AI Work Documentation Log (`/docs/`)
+
+To track what AI agents (Claude Code / Antigravity) have done across sessions, every agent **must** log its work:
+
+*   **Location:** `/docs/` at repo root.
+*   **One file per work unit**, named `YYYY-MM-DD-short-kebab-description.md` (e.g. `2026-06-24-scaffold-and-postgres.md`).
+*   **Contents:** date, agent/tool, summary of intent, files added/changed/deleted, key decisions, build/verify status, follow-ups. Be concrete — list real file paths and the "why".
+*   **Index:** keep `/docs/README.md` updated with a one-line pointer to each entry (newest first).
+*   **When:** create/update the entry as the final step of any code-shaping task, before reporting done. Bug fixes, features, refactors, config, and deploys all count. Pure Q&A or read-only exploration does not.
+
+**Two knowledge layers, complementary:**
+1.  `/docs/` — chronological narrative of *what agents did and why* (human-readable history).
+2.  `code-review-graph` (MCP) — structural map of *what the code is now* (callers, dependents, flows). After significant changes, rebuild via `build_or_update_graph_tool` so the graph matches reality; consult `/docs/` for the history the graph cannot express.
